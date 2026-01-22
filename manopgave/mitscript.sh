@@ -117,10 +117,10 @@ effect_tree() {
   ((row+=2))
 
   # Message
-  printf "\033[%d;%dH${W}Glaedelig Jul!${RS}" "$row" "$((cx - 7))"
+  printf "\033[%d;%dH${W}Glædelig Jul!${RS}" "$row" "$((cx - 7))"
   ((row+=2))
   
-  printf "\033[%d;%dHTip: proev --fireworks eller --snow" "$row" "$((cx - 18))"
+  printf "\033[%d;%dHTip: Prøv --fireworks eller --snow" "$row" "$((cx - 18))"
   
   # Move cursor to bottom
   printf "\033[%d;1H\n" "$h"
