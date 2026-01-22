@@ -138,97 +138,108 @@ effect_fireworks() {
     stty -echo -icanon min 0 time 1 2>/dev/null || true
   fi
 
-  # Number of rockets based on FRAMES parameter
-  local num_rockets=$((FRAMES / 20))
-  ((num_rockets < 3)) && num_rockets=3
-  ((num_rockets > 15)) && num_rockets=15
+  # Launch position (center of screen)
+  local launch_x=$((w / 2))
+  local target_y=$((h / 4))
+  
+  # Pick a color for this rocket
+  local colors=("31" "32" "33" "34" "35" "36" "91" "92" "93" "94" "95" "96")
+  local col="\033[${colors[$((RANDOM % ${#colors[@]}))]}m"
+  local rs="\033[0m"
 
-  for ((rocket = 0; rocket < num_rockets; rocket++)); do
-    if check_quit; then break; fi
+  clear_screen
 
-    # Random launch position
-    local launch_x=$((10 + RANDOM % (w - 20)))
-    local target_y=$((4 + RANDOM % (h / 3)))
+  # === PHASE 1: Rocket launch (bottom to target) ===
+  for ((y = h - 2; y > target_y; y--)); do
+    if check_quit; then
+      show_cursor
+      return
+    fi
     
-    # Pick a color for this rocket
-    local colors=("31" "32" "33" "34" "35" "36" "91" "92" "93" "94" "95" "96")
-    local col="\033[${colors[$((RANDOM % ${#colors[@]}))]}m"
-    local rs="\033[0m"
+    clear_screen
+    
+    # Draw rocket with trail
+    printf "\033[%d;%dH${col}▲${rs}" "$y" "$launch_x"
+    printf "\033[%d;%dH${col}│${rs}" "$((y + 1))" "$launch_x"
+    if ((y + 2 < h - 1)); then
+      printf "\033[%d;%dH\033[33m*${rs}" "$((y + 2))" "$launch_x"
+    fi
+    if ((y + 3 < h - 1)); then
+      printf "\033[%d;%dH\033[31m.${rs}" "$((y + 3))" "$launch_x"
+    fi
+    
+    # Footer
+    printf "\033[%d;1HRaket affyret! 🚀" "$h"
+    
+    sleep 0.03
+  done
 
-    # === PHASE 1: Rocket launch (bottom to target) ===
-    for ((y = h - 2; y > target_y; y -= 2)); do
-      if check_quit; then break 2; fi
-      
-      clear_screen
-      
-      # Draw rocket
-      printf "\033[%d;%dH${col}^${rs}" "$y" "$launch_x"
-      printf "\033[%d;%dH${col}|${rs}" "$((y + 1))" "$launch_x"
-      
-      # Footer
-      printf "\033[%d;1HRaket %d/%d - Tryk 'q' for at stoppe" "$h" "$((rocket + 1))" "$num_rockets"
-      
-      sleep 0.04
-    done
-
-    # === PHASE 2: Explosion (expanding) ===
-    for ((radius = 1; radius <= 5; radius++)); do
-      if check_quit; then break 2; fi
-      
-      clear_screen
-      
-      # Draw explosion rays in 8 directions
-      local dx dy nx ny
-      for dx in -1 0 1; do
-        for dy in -1 0 1; do
-          for ((r = 1; r <= radius; r++)); do
-            nx=$((launch_x + dx * r * 2))
-            ny=$((target_y + dy * r))
-            if ((nx > 0 && nx < w && ny > 0 && ny < h - 1)); then
-              local char="."
-              ((r == radius)) && char="*"
-              printf "\033[%d;%dH${col}%s${rs}" "$ny" "$nx" "$char"
-            fi
-          done
-        done
-      done
-      
-      # Center burst
-      printf "\033[%d;%dH${col}@${rs}" "$target_y" "$launch_x"
-      
-      printf "\033[%d;1HRaket %d/%d - BOOM!" "$h" "$((rocket + 1))" "$num_rockets"
-      sleep 0.1
-    done
-
-    # === PHASE 3: Fade out ===
-    for ((fade = 5; fade >= 1; fade--)); do
-      if check_quit; then break 2; fi
-      
-      clear_screen
-      
-      for dx in -1 0 1; do
-        for dy in -1 0 1; do
-          local r=$fade
+  # === PHASE 2: Explosion (expanding) ===
+  local explosion_chars=("*" "✦" "✷" "◦" "·")
+  for ((radius = 1; radius <= 8; radius++)); do
+    if check_quit; then
+      show_cursor
+      return
+    fi
+    
+    clear_screen
+    
+    # Draw explosion rays in 8 directions with sparkle effect
+    local dx dy nx ny
+    for dx in -1 0 1; do
+      for dy in -1 0 1; do
+        for ((r = 1; r <= radius; r++)); do
           nx=$((launch_x + dx * r * 2))
           ny=$((target_y + dy * r))
           if ((nx > 0 && nx < w && ny > 0 && ny < h - 1)); then
-            printf "\033[%d;%dH${col}.${rs}" "$ny" "$nx"
+            local char="${explosion_chars[$((RANDOM % ${#explosion_chars[@]}))]}"
+            ((r == radius)) && char="✸"
+            printf "\033[%d;%dH${col}%s${rs}" "$ny" "$nx" "$char"
           fi
         done
       done
-      
-      printf "\033[%d;1HRaket %d/%d" "$h" "$((rocket + 1))" "$num_rockets"
-      sleep 0.08
     done
-
-    # Pause between rockets
-    sleep 0.2
+    
+    # Center burst
+    printf "\033[%d;%dH${col}💥${rs}" "$target_y" "$launch_x"
+    
+    printf "\033[%d;1H🎆 BOOM! 🎆" "$h"
+    sleep 0.08
   done
 
+  # === PHASE 3: Sparkle and fade out ===
+  for ((fade = 8; fade >= 1; fade--)); do
+    if check_quit; then
+      show_cursor
+      return
+    fi
+    
+    clear_screen
+    
+    # Fading sparks falling down
+    for dx in -1 0 1; do
+      for dy in -1 0 1; do
+        local r=$fade
+        nx=$((launch_x + dx * r * 2 + (RANDOM % 3) - 1))
+        ny=$((target_y + dy * r + (8 - fade)))
+        if ((nx > 0 && nx < w && ny > 0 && ny < h - 1)); then
+          local fade_char="·"
+          ((fade > 4)) && fade_char="."
+          ((fade > 6)) && fade_char="*"
+          printf "\033[%d;%dH${col}%s${rs}" "$ny" "$nx" "$fade_char"
+        fi
+      done
+    done
+    
+    printf "\033[%d;1H✨ Fyrværkeri ✨" "$h"
+    sleep 0.1
+  done
+
+  # Final message
   clear_screen
-  printf "\033[%d;%dHFyrvaerkeri faerdigt!" "$((h/2))" "$((w/2 - 10))"
+  printf "\033[%d;%dH🎆 Godt Nytår! 🎆" "$((h/2))" "$((w/2 - 9))"
   printf "\033[%d;1H\n" "$h"
-  sleep 1
+  sleep 1.5
   
   show_cursor
 }
