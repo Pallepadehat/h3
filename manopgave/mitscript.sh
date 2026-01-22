@@ -5,8 +5,6 @@ PROG="mitscript"
 VERSION="1.0"
 
 EFFECT=""
-FRAMES="120"
-DELAY="0.1"
 
 cleanup() {
   command -v tput >/dev/null 2>&1 && tput cnorm || true
@@ -32,26 +30,17 @@ Effekter:
   -f, --fireworks       Vis fyrvaerkeri (animation).
   -s, --snow            Vis sne (animation).
 
-Indstillinger:
-  -n, --frames N        Antal frames/raketter. Default: 120
-  -d, --delay SECONDS   Pause mellem frames. Default: 0.1
-
 Hjaelp:
   --man                 Aabn man-siden.
   -h, --help            Vis denne hjaelp.
 
 Eksempler:
   ./mitscript.sh --tree
-  ./mitscript.sh --fireworks -n 5
+  ./mitscript.sh --fireworks
   ./mitscript.sh --snow
 
 Stop animation: Tryk 'q' eller Ctrl+C.
 EOF
-}
-
-require_number() {
-  local v="$1"
-  [[ "$v" =~ ^[0-9]+$ ]] || die "Forventede et heltal, fik: $v"
 }
 
 cols() { tput cols 2>/dev/null || echo 80; }
@@ -266,7 +255,6 @@ effect_snow() {
   done
 
   local flakes=("❄" "❅" "❆" "*" "." "·")
-  local ground_snow=""
   
   # Build ground accumulation area
   declare -a ground
@@ -275,7 +263,6 @@ effect_snow() {
   done
 
   local all_landed=0
-  local frame=0
 
   while ((all_landed == 0)); do
     if check_quit; then
@@ -340,7 +327,6 @@ effect_snow() {
     done
 
     # Footer
-    ((frame++))
     printf "\033[%d;1H❄️ Sne falder... Tryk 'q' for at stoppe" "$h"
 
     sleep 0.05
@@ -387,19 +373,6 @@ while (($# > 0)); do
     ;;
   -s | --snow)
     EFFECT="snow"
-    shift
-    ;;
-  -n | --frames)
-    shift
-    [[ $# -gt 0 ]] || die "Mangler vaerdi til --frames"
-    require_number "$1"
-    FRAMES="$1"
-    shift
-    ;;
-  -d | --delay)
-    shift
-    [[ $# -gt 0 ]] || die "Mangler vaerdi til --delay"
-    DELAY="$1"
     shift
     ;;
   --man)
