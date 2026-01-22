@@ -1,0 +1,83 @@
+.TH MITSCRIPT 1 "Januar 2026" "mitscript 1.0" "User Commands"
+.
+.SH NAVN
+mitscript \- terminal effekter med juletræ, sne og fyrværkeri
+.
+.SH SYNOPSIS
+.B ./mitscript.sh
+.RI [ OPTIONS ]
+.
+.SH BESKRIVELSE
+.B mitscript
+viser ASCII/ANSI-effekter i terminalen.
+.PP
+Scriptet understøtter tre effekter:
+.IP \(bu 2
+Juletræ (statisk visning)
+.IP \(bu 2
+Fyrværkeri (farverig animation)
+.IP \(bu 2
+Sne (faldende snefnug)
+.
+.SH EFFEKTER
+.TP
+.BR \-t ", " \-\-tree
+Vis et juletræ med pynt og stjerne.
+.TP
+.BR \-f ", " \-\-fireworks
+Vis fyrværkeri animation med tilfældige farver.
+.TP
+.BR \-s ", " \-\-snow
+Vis faldende sne animation.
+.
+.SH INDSTILLINGER
+.TP
+.BI \-n " N" "\fR, \fP" \-\-frames " N"
+Antal frames for animationer. Standard: 120.
+.TP
+.BI \-d " SEKUNDER" "\fR, \fP" \-\-delay " SEKUNDER"
+Pause mellem frames. Standard: 0.1.
+.
+.SH HJÆLP
+.TP
+.B \-\-man
+Åbn denne man-side.
+.TP
+.BR \-h ", " \-\-help
+Vis kort hjælpetekst.
+.
+.SH EKSEMPLER
+.TP
+Vis juletræ:
+.B ./mitscript.sh \-\-tree
+.TP
+Hurtig fyrværkeri:
+.B ./mitscript.sh \-\-fireworks \-d 0.05
+.TP
+Lang sne animation:
+.B ./mitscript.sh \-\-snow \-n 300
+.
+.SH STOP ANIMATION
+Animationer kan stoppes med:
+.IP \(bu 2
+Tast \fBq\fR
+.IP \(bu 2
+Tryk \fBCtrl+C\fR
+.
+.SH EXIT STATUS
+.TP
+.B 0
+Succes.
+.TP
+.B 1
+Manglende eller ugyldige argumenter.
+.TP
+.B 2
+Ukendt option.
+.
+.SH FORFATTER
+Skrevet af Pallepadehat.
+.
+.SH SE OGSÅ
+.BR bash (1),
+.BR tput (1)
