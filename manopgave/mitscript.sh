@@ -361,8 +361,8 @@ effect_snow() {
     fi
   done
 
-  printf "\033[%d;%dH❄️ Sneen er faldet! ❄️"  "$((h/2))" "$((w/2 - 11))"
-  printf "\033[%d;%dH\n ❄️ Kør forsigtigt ud i trafikken! ❄️"  "$((h/2))" "$((w/2 - 11))"
+  printf "\033[%d;%dH❄️ Sneen er faldet! ❄️" "$((h/2))" "$((w/2 - 10))"
+  printf "\033[%d;%dH❄️ Kør forsigtigt ud i trafikken! ❄️" "$((h/2 + 1))" "$((w/2 - 17))"
   printf "\033[%d;1H\n" "$h"
   sleep 1.5
 
